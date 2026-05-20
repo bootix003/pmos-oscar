@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 120
 
     steps:
@@ -22,7 +22,7 @@ jobs:
             gcc-aarch64-linux-gnu \
             bison flex libssl-dev libelf-dev \
             bc make openssl
-          pip3 install --user pmbootstrap
+          pip3 install --user pmbootstrap==2.1.0 --break-system-packages
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Setup pmaports
