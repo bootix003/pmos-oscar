@@ -43,7 +43,7 @@ jobs:
           mkdir -p $WORK
           # Порядок ответов init v3:
           # work, pmaports, channel, vendor, codename, ui, user, hostname, timezone, locale, ssh_keys
-          printf '%s\n%s\nedge\nrealme\noscar\nxfce4\nuser\noscar-pmos\nUTC\nen_US.UTF-8\nn\n' \
+          printf '%s\n%s\nedge\nrealme\noscar\nxfce4\nuser\npulseaudio\noscar-pmos\nUTC\nen_US.UTF-8\nn\n' \
             "$WORK" "/tmp/pmaports" | \
             python3 /tmp/pmbootstrap/pmbootstrap.py init
           python3 /tmp/pmbootstrap/pmbootstrap.py config
