@@ -34,42 +34,20 @@ jobs:
       - name: Configure pmbootstrap
         run: |
           mkdir -p ~/.config/pmbootstrap
-          cat > ~/.config/pmbootstrap/config << 'PMCONF'
-[pmbootstrap]
-aports = /tmp/pmaports
-ccache_size = 5G
-device = realme-oscar
-extra_packages = nano,openssh
-hostname = oscar-pmos
-jobs = 4
-kernel = downstream
-keymap =
-locale = en_US.UTF-8
-mirror_alpine = https://dl-cdn.alpinelinux.org/alpine/
-nonfree_firmware = true
-nonfree_userland = false
-ssh_keys = false
-timezone = UTC
-ui = xfce4
-user = user
-work = /home/runner/.local/var/pmbootstrap
-PMCONF
+          printf '[pmbootstrap]\naports = /tmp/pmaports\nccache_size = 5G\ndevice = realme-oscar\nextra_packages = nano,openssh\nhostname = oscar-pmos\njobs = 4\nkernel = downstream\nkeymap =\nlocale = en_US.UTF-8\nmirror_alpine = https://dl-cdn.alpinelinux.org/alpine/\nnonfree_firmware = true\nnonfree_userland = false\nssh_keys = false\ntimezone = UTC\nui = xfce4\nuser = user\nwork = /home/runner/.local/var/pmbootstrap\n' > ~/.config/pmbootstrap/config
           pmbootstrap -y work_migrate
 
       - name: Build kernel
         run: |
-          pmbootstrap -y build linux-realme-oscar \
-            2>&1 | tee kernel-build.log
+          pmbootstrap -y build linux-realme-oscar 2>&1 | tee kernel-build.log
 
       - name: Build device package
         run: |
-          pmbootstrap -y build device-realme-oscar \
-            2>&1 | tee device-build.log
+          pmbootstrap -y build device-realme-oscar 2>&1 | tee device-build.log
 
-      - name: Install (create rootfs)
+      - name: Install rootfs
         run: |
-          pmbootstrap -y install --no-fde \
-            2>&1 | tee install.log
+          pmbootstrap -y install --no-fde 2>&1 | tee install.log
 
       - name: Export images
         run: |
@@ -92,7 +70,7 @@ PMCONF
           path: output/rootfs*.img
           retention-days: 30
 
-      - name: Upload logs (always)
+      - name: Upload logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
