@@ -1,0 +1,87 @@
+name: Build postmarketOS for Realme 9 Pro 5G (oscar)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            git python3 python3-pip \
+            gcc-aarch64-linux-gnu \
+            bison flex libssl-dev libelf-dev \
+            bc make openssl
+          pip3 install --user pmbootstrap
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Setup pmaports
+        run: |
+          git clone --depth=1 https://gitlab.com/postmarketOS/pmaports.git /tmp/pmaports
+          cp -r device-realme-oscar /tmp/pmaports/device/testing/
+          cp -r linux-realme-oscar /tmp/pmaports/device/testing/
+
+      - name: Init pmbootstrap
+        run: |
+          pmbootstrap --aports /tmp/pmaports \
+            --details-to-stdout \
+            -y \
+            init \
+            --device realme-oscar \
+            --ui xfce4 \
+            --user user \
+            --hostname oscar-pmos
+
+      - name: Build kernel
+        run: |
+          pmbootstrap --aports /tmp/pmaports -y build linux-realme-oscar \
+            2>&1 | tee kernel-build.log
+
+      - name: Build device package
+        run: |
+          pmbootstrap --aports /tmp/pmaports -y build device-realme-oscar \
+            2>&1 | tee device-build.log
+
+      - name: Install (create rootfs)
+        run: |
+          pmbootstrap --aports /tmp/pmaports -y install --no-fde \
+            2>&1 | tee install.log
+
+      - name: Export images
+        run: |
+          pmbootstrap export
+          mkdir output
+          cp /tmp/postmarketOS-export/* output/ 2>/dev/null || true
+          ls -lh output/
+
+      - name: Upload boot.img
+        uses: actions/upload-artifact@v4
+        with:
+          name: boot-img
+          path: output/boot.img
+          retention-days: 30
+
+      - name: Upload rootfs
+        uses: actions/upload-artifact@v4
+        with:
+          name: rootfs-img
+          path: output/rootfs*.img
+          retention-days: 30
+
+      - name: Upload logs (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: "*.log"
+          retention-days: 7

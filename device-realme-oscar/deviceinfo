@@ -1,0 +1,31 @@
+# Reference: <https://postmarketos.org/deviceinfo>
+
+deviceinfo_format_version="0"
+deviceinfo_name="Realme 9 Pro 5G"
+deviceinfo_manufacturer="Realme"
+deviceinfo_date=""
+deviceinfo_dtb=""
+deviceinfo_modules_initfs="msm_drm ufs_qcom"
+deviceinfo_external_disk="false"
+deviceinfo_flash_method="fastboot"
+deviceinfo_arch="aarch64"
+
+kernel="downstream"
+deviceinfo_ab_slot="true"
+deviceinfo_bootimg_header_version="3"
+deviceinfo_vendor_boot="true"
+
+deviceinfo_flash_pagesize="4096"
+deviceinfo_flash_offset_base="0x00000000"
+deviceinfo_flash_offset_kernel="0x00008000"
+deviceinfo_flash_offset_ramdisk="0x01000000"
+deviceinfo_flash_offset_second="0x00f00000"
+deviceinfo_flash_offset_tags="0x00000100"
+
+deviceinfo_screen_width="1080"
+deviceinfo_screen_height="2412"
+
+deviceinfo_flash_flags="--disable-verity --disable-verification"
+deviceinfo_bootimg_qcdt="false"
+deviceinfo_bootimg_mtk_mkimage="false"
+deviceinfo_bootimg_dtb_second="false"
