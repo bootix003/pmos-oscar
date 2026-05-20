@@ -6,8 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  PMB: /tmp/pmbootstrap/pmbootstrap.py
-  WORK: /home/runner/.local/var/pmbootstrap
+  PMB: python3 /tmp/pmbootstrap/pmbootstrap.py
 
 jobs:
   build:
@@ -29,39 +28,61 @@ jobs:
 
       - name: Install pmbootstrap
         run: |
-          git clone --depth=1 https://gitlab.postmarketos.org/postmarketOS/pmbootstrap /tmp/pmbootstrap
-          python3 $PMB --version
+          git clone --depth=1 https://gitlab.postmarketos.org/postmarketOS/pmbootstrap.git /tmp/pmbootstrap
+          ls /tmp/pmbootstrap/
+          python3 /tmp/pmbootstrap/pmbootstrap.py --version
 
       - name: Setup pmaports
         run: |
+          WORK=/home/runner/.local/var/pmbootstrap
           PMAPORTS=$WORK/cache_git/pmaports
           mkdir -p $WORK $PMAPORTS
           git clone --depth=1 https://gitlab.postmarketos.org/postmarketOS/pmaports.git $PMAPORTS
           cp -r device-realme-oscar $PMAPORTS/device/testing/
           cp -r linux-realme-oscar $PMAPORTS/device/testing/
 
-      - name: Configure pmbootstrap
+      - name: Init pmbootstrap
         run: |
-          mkdir -p ~/.config/pmbootstrap
-          printf '[pmbootstrap]\naports = %s\nccache_size = 5G\ndevice = realme-oscar\nextra_packages = nano,openssh\nhostname = oscar-pmos\njobs = 4\nkernel = downstream\nkeymap =\nlocale = en_US.UTF-8\nmirror_alpine = https://dl-cdn.alpinelinux.org/alpine/\nnonfree_firmware = true\nnonfree_userland = false\nssh_keys = false\ntimezone = UTC\nui = xfce4\nuser = user\nwork = %s\n' \
-            "$WORK/cache_git/pmaports" "$WORK" > ~/.config/pmbootstrap/config
-          python3 $PMB -y work_migrate
+          WORK=/home/runner/.local/var/pmbootstrap
+          PMAPORTS=$WORK/cache_git/pmaports
+          printf 'realme-oscar\nxfce4\nuser\noscarpmos\nUTC\nen_US.UTF-8\n\n' | \
+            python3 /tmp/pmbootstrap/pmbootstrap.py \
+              --work $WORK \
+              --aports $PMAPORTS \
+              init || true
+          python3 /tmp/pmbootstrap/pmbootstrap.py --work $WORK --aports $PMAPORTS config
 
       - name: Build kernel
         run: |
-          python3 $PMB -y build linux-realme-oscar 2>&1 | tee kernel-build.log
+          WORK=/home/runner/.local/var/pmbootstrap
+          PMAPORTS=$WORK/cache_git/pmaports
+          python3 /tmp/pmbootstrap/pmbootstrap.py \
+            --work $WORK --aports $PMAPORTS \
+            -y build linux-realme-oscar 2>&1 | tee kernel-build.log
 
       - name: Build device package
         run: |
-          python3 $PMB -y build device-realme-oscar 2>&1 | tee device-build.log
+          WORK=/home/runner/.local/var/pmbootstrap
+          PMAPORTS=$WORK/cache_git/pmaports
+          python3 /tmp/pmbootstrap/pmbootstrap.py \
+            --work $WORK --aports $PMAPORTS \
+            -y build device-realme-oscar 2>&1 | tee device-build.log
 
       - name: Install rootfs
         run: |
-          python3 $PMB -y install --no-fde 2>&1 | tee install.log
+          WORK=/home/runner/.local/var/pmbootstrap
+          PMAPORTS=$WORK/cache_git/pmaports
+          python3 /tmp/pmbootstrap/pmbootstrap.py \
+            --work $WORK --aports $PMAPORTS \
+            -y install --no-fde 2>&1 | tee install.log
 
       - name: Export images
         run: |
-          python3 $PMB export
+          WORK=/home/runner/.local/var/pmbootstrap
+          PMAPORTS=$WORK/cache_git/pmaports
+          python3 /tmp/pmbootstrap/pmbootstrap.py \
+            --work $WORK --aports $PMAPORTS \
+            export
           mkdir output
           cp /tmp/postmarketOS-export/* output/ 2>/dev/null || true
           ls -lh output/
