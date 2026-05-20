@@ -28,38 +28,25 @@ jobs:
           git clone --depth=1 https://gitlab.postmarketos.org/postmarketOS/pmbootstrap.git /tmp/pmbootstrap
           python3 /tmp/pmbootstrap/pmbootstrap.py --version
 
-      - name: Init pmbootstrap non-interactively
+      - name: Clone pmaports and copy device packages
+        run: |
+          PMAPORTS=/tmp/pmaports
+          git clone --depth=1 -b main \
+            https://gitlab.postmarketos.org/postmarketOS/pmaports.git $PMAPORTS
+          cp -r device-realme-oscar $PMAPORTS/device/testing/
+          cp -r linux-realme-oscar $PMAPORTS/device/testing/
+          ls $PMAPORTS/device/testing/ | grep realme
+
+      - name: Init pmbootstrap
         run: |
           WORK=/home/runner/.local/var/pmbootstrap
           mkdir -p $WORK
-
-          # Запускаем init с заготовленными ответами в правильном порядке:
-          # work path, pmaports path, channel, vendor, codename, kernel, ui, user, hostname, timezone, locale, ssh_keys
-          printf '%s\n\nedge\nrealme\noscar\ndownstream\nxfce4\nuser\noscar-pmos\nUTC\nen_US.UTF-8\nn\n' \
-            "$WORK" | \
-            python3 /tmp/pmbootstrap/pmbootstrap.py init || true
-
-          # Принудительно выставляем нужные значения через config
-          python3 /tmp/pmbootstrap/pmbootstrap.py config device realme-oscar
-          python3 /tmp/pmbootstrap/pmbootstrap.py config ui xfce4
-          python3 /tmp/pmbootstrap/pmbootstrap.py config kernel downstream
-          python3 /tmp/pmbootstrap/pmbootstrap.py config user user
-          python3 /tmp/pmbootstrap/pmbootstrap.py config hostname oscar-pmos
-          python3 /tmp/pmbootstrap/pmbootstrap.py config timezone UTC
-          python3 /tmp/pmbootstrap/pmbootstrap.py config locale en_US.UTF-8
-          python3 /tmp/pmbootstrap/pmbootstrap.py config ssh_keys false
-          python3 /tmp/pmbootstrap/pmbootstrap.py config channel edge
-
-          # Показываем итоговый конфиг
+          # Порядок ответов init v3:
+          # work, pmaports, channel, vendor, codename, ui, user, hostname, timezone, locale, ssh_keys
+          printf '%s\n%s\nedge\nrealme\noscar\nxfce4\nuser\noscar-pmos\nUTC\nen_US.UTF-8\nn\n' \
+            "$WORK" "/tmp/pmaports" | \
+            python3 /tmp/pmbootstrap/pmbootstrap.py init
           python3 /tmp/pmbootstrap/pmbootstrap.py config
-
-      - name: Copy device packages to pmaports
-        run: |
-          WORK=/home/runner/.local/var/pmbootstrap
-          PMAPORTS=$(python3 /tmp/pmbootstrap/pmbootstrap.py config aports)
-          echo "pmaports at: $PMAPORTS"
-          cp -r device-realme-oscar $PMAPORTS/device/testing/
-          cp -r linux-realme-oscar $PMAPORTS/device/testing/
 
       - name: Build kernel
         run: |
