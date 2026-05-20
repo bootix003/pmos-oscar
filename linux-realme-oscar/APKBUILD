@@ -4,6 +4,7 @@ pkgrel=0
 pkgdesc="Realme 9 Pro 5G downstream kernel (SM6375)"
 arch="aarch64"
 license="GPL-2.0-only"
+url="https://github.com/frpunlocking-com/android_kernel_realme_sm6375"
 options="!strip !check !tracedeps pmb:kconfigcheck-nftables"
 makedepends="
 	bash bc bison devicepkg-dev elfutils-dev flex
