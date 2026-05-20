@@ -41,7 +41,7 @@ jobs:
           mkdir -p $WORK
           # Порядок: work, pmaports, channel, vendor, codename, username,
           # provider audio, provider wifi, provider usb, UI, hostname, timezone, locale, ssh_keys
-          printf "$WORK\n/tmp/pmaports\nedge\nrealme\noscar\nuser\npulseaudio\nwpa_supplicant\ndeveloper\nxfce4\nnever\nn\nnone\noscar-pmos\nUTC\nen_US.UTF-8\nn\n" | \
+          printf "$WORK\n/tmp/pmaports\nedge\nrealme\noscar\nuser\npulseaudio\nwpa_supplicant\ndeveloper\nxfce4\nnever\nn\nnone\ny\nen_US\nn\n" | \
             python3 /tmp/pmbootstrap/pmbootstrap.py init
           python3 /tmp/pmbootstrap/pmbootstrap.py config
 
