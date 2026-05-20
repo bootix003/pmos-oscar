@@ -39,12 +39,22 @@ jobs:
         run: |
           WORK=/home/runner/.local/var/pmbootstrap
           mkdir -p $WORK
-          # Порядок ответов:
-          # work, pmaports, channel, vendor, codename, ui, username,
-          # audio provider, wifi provider, hostname, timezone, locale, ssh_keys
-          printf '%s\n%s\nedge\nrealme\noscar\nxfce4\nuser\npulseaudio\nwpa_supplicant\noscar-pmos\nUTC\nen_US.UTF-8\nn\n' \
-            "$WORK" "/tmp/pmaports" | \
-            python3 /tmp/pmbootstrap/pmbootstrap.py init
+          python3 /tmp/pmbootstrap/pmbootstrap.py init << 'ANSWERS'
+          $WORK
+          /tmp/pmaports
+          edge
+          realme
+          oscar
+          xfce4
+          user
+          pulseaudio
+          wpa_supplicant
+          developer
+          oscar-pmos
+          UTC
+          en_US.UTF-8
+          n
+          ANSWERS
           python3 /tmp/pmbootstrap/pmbootstrap.py config
 
       - name: Build kernel
