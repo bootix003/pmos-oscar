@@ -22,7 +22,8 @@ jobs:
             gcc-aarch64-linux-gnu \
             bison flex libssl-dev libelf-dev \
             bc make openssl
-          pip3 install --user git+https://git.sr.ht/~postmarketos/pmbootstrap --break-system-packages
+          git clone --depth=1 https://git.sr.ht/~postmarketos/pmbootstrap /tmp/pmbootstrap
+          echo "/tmp/pmbootstrap" >> $GITHUB_PATH
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Setup pmbootstrap and pmaports
