@@ -36,7 +36,7 @@ jobs:
         run: |
           PMAPORTS=$WORK/cache_git/pmaports
           mkdir -p $WORK $PMAPORTS
-          git clone --depth=1 https://gitlab.com/postmarketOS/pmaports.git $PMAPORTS
+          git clone --depth=1 https://gitlab.postmarketos.org/postmarketOS/pmaports.git $PMAPORTS
           cp -r device-realme-oscar $PMAPORTS/device/testing/
           cp -r linux-realme-oscar $PMAPORTS/device/testing/
 
