@@ -5,6 +5,10 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+env:
+  PMB: /tmp/pmbootstrap/pmbootstrap.py
+  WORK: /home/runner/.local/var/pmbootstrap
+
 jobs:
   build:
     runs-on: ubuntu-24.04
@@ -22,40 +26,42 @@ jobs:
             gcc-aarch64-linux-gnu \
             bison flex libssl-dev libelf-dev \
             bc make openssl
-          git clone --depth=1 https://git.sr.ht/~postmarketos/pmbootstrap /tmp/pmbootstrap
-          echo "/tmp/pmbootstrap" >> $GITHUB_PATH
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Setup pmbootstrap and pmaports
+      - name: Install pmbootstrap
         run: |
-          WORK=/home/runner/.local/var/pmbootstrap
+          git clone --depth=1 https://git.sr.ht/~postmarketos/pmbootstrap /tmp/pmbootstrap
+          python3 $PMB --version
+
+      - name: Setup pmaports
+        run: |
           PMAPORTS=$WORK/cache_git/pmaports
           mkdir -p $WORK $PMAPORTS
-
           git clone --depth=1 https://gitlab.com/postmarketOS/pmaports.git $PMAPORTS
           cp -r device-realme-oscar $PMAPORTS/device/testing/
           cp -r linux-realme-oscar $PMAPORTS/device/testing/
 
+      - name: Configure pmbootstrap
+        run: |
           mkdir -p ~/.config/pmbootstrap
-          printf '[pmbootstrap]\naports = %s\nccache_size = 5G\ndevice = realme-oscar\nextra_packages = nano,openssh\nhostname = oscar-pmos\njobs = 4\nkernel = downstream\nkeymap =\nlocale = en_US.UTF-8\nmirror_alpine = https://dl-cdn.alpinelinux.org/alpine/\nnonfree_firmware = true\nnonfree_userland = false\nssh_keys = false\ntimezone = UTC\nui = xfce4\nuser = user\nwork = %s\n' "$PMAPORTS" "$WORK" > ~/.config/pmbootstrap/config
-          cat ~/.config/pmbootstrap/config
-          pmbootstrap -y work_migrate
+          printf '[pmbootstrap]\naports = %s\nccache_size = 5G\ndevice = realme-oscar\nextra_packages = nano,openssh\nhostname = oscar-pmos\njobs = 4\nkernel = downstream\nkeymap =\nlocale = en_US.UTF-8\nmirror_alpine = https://dl-cdn.alpinelinux.org/alpine/\nnonfree_firmware = true\nnonfree_userland = false\nssh_keys = false\ntimezone = UTC\nui = xfce4\nuser = user\nwork = %s\n' \
+            "$WORK/cache_git/pmaports" "$WORK" > ~/.config/pmbootstrap/config
+          python3 $PMB -y work_migrate
 
       - name: Build kernel
         run: |
-          pmbootstrap -y build linux-realme-oscar 2>&1 | tee kernel-build.log
+          python3 $PMB -y build linux-realme-oscar 2>&1 | tee kernel-build.log
 
       - name: Build device package
         run: |
-          pmbootstrap -y build device-realme-oscar 2>&1 | tee device-build.log
+          python3 $PMB -y build device-realme-oscar 2>&1 | tee device-build.log
 
       - name: Install rootfs
         run: |
-          pmbootstrap -y install --no-fde 2>&1 | tee install.log
+          python3 $PMB -y install --no-fde 2>&1 | tee install.log
 
       - name: Export images
         run: |
-          pmbootstrap export
+          python3 $PMB export
           mkdir output
           cp /tmp/postmarketOS-export/* output/ 2>/dev/null || true
           ls -lh output/
