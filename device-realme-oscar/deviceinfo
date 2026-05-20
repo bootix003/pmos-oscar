@@ -1,6 +1,7 @@
 # Reference: <https://postmarketos.org/deviceinfo>
 
 deviceinfo_format_version="0"
+deviceinfo_codename="oscar"
 deviceinfo_name="Realme 9 Pro 5G"
 deviceinfo_manufacturer="Realme"
 deviceinfo_date=""
