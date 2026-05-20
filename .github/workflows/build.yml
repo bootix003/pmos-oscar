@@ -51,6 +51,11 @@ jobs:
           python3 /tmp/pmbootstrap/pmbootstrap.py checksum linux-realme-oscar
           python3 /tmp/pmbootstrap/pmbootstrap.py checksum device-realme-oscar
 
+      - name: Generate checksums
+        run: |
+          python3 /tmp/pmbootstrap/pmbootstrap.py checksum linux-realme-oscar
+          python3 /tmp/pmbootstrap/pmbootstrap.py checksum device-realme-oscar
+
       - name: Build kernel
         run: |
           python3 /tmp/pmbootstrap/pmbootstrap.py -y build linux-realme-oscar \
