@@ -57,7 +57,7 @@ jobs:
 
       - name: Install rootfs
         run: |
-          python3 /tmp/pmbootstrap/pmbootstrap.py -y install --no-fde \
+          python3 /tmp/pmbootstrap/pmbootstrap.py -y install --password 1234 \
             2>&1 | tee install.log
 
       - name: Export images
