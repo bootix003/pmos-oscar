@@ -29,7 +29,7 @@ jobs:
 
       - name: Install pmbootstrap
         run: |
-          git clone --depth=1 https://git.sr.ht/~postmarketos/pmbootstrap /tmp/pmbootstrap
+          git clone --depth=1 https://gitlab.postmarketos.org/postmarketOS/pmbootstrap /tmp/pmbootstrap
           python3 $PMB --version
 
       - name: Setup pmaports
