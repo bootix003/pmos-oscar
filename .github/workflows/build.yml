@@ -5,9 +5,6 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
-env:
-  PMB: python3 /tmp/pmbootstrap/pmbootstrap.py
-
 jobs:
   build:
     runs-on: ubuntu-24.04
@@ -29,60 +26,59 @@ jobs:
       - name: Install pmbootstrap
         run: |
           git clone --depth=1 https://gitlab.postmarketos.org/postmarketOS/pmbootstrap.git /tmp/pmbootstrap
-          ls /tmp/pmbootstrap/
           python3 /tmp/pmbootstrap/pmbootstrap.py --version
 
-      - name: Setup pmaports
+      - name: Init pmbootstrap non-interactively
         run: |
           WORK=/home/runner/.local/var/pmbootstrap
-          PMAPORTS=$WORK/cache_git/pmaports
-          mkdir -p $WORK $PMAPORTS
-          git clone --depth=1 https://gitlab.postmarketos.org/postmarketOS/pmaports.git $PMAPORTS
+          mkdir -p $WORK
+
+          # Запускаем init с заготовленными ответами в правильном порядке:
+          # work path, pmaports path, channel, vendor, codename, kernel, ui, user, hostname, timezone, locale, ssh_keys
+          printf '%s\n\nedge\nrealme\noscar\ndownstream\nxfce4\nuser\noscar-pmos\nUTC\nen_US.UTF-8\nn\n' \
+            "$WORK" | \
+            python3 /tmp/pmbootstrap/pmbootstrap.py init || true
+
+          # Принудительно выставляем нужные значения через config
+          python3 /tmp/pmbootstrap/pmbootstrap.py config device realme-oscar
+          python3 /tmp/pmbootstrap/pmbootstrap.py config ui xfce4
+          python3 /tmp/pmbootstrap/pmbootstrap.py config kernel downstream
+          python3 /tmp/pmbootstrap/pmbootstrap.py config user user
+          python3 /tmp/pmbootstrap/pmbootstrap.py config hostname oscar-pmos
+          python3 /tmp/pmbootstrap/pmbootstrap.py config timezone UTC
+          python3 /tmp/pmbootstrap/pmbootstrap.py config locale en_US.UTF-8
+          python3 /tmp/pmbootstrap/pmbootstrap.py config ssh_keys false
+          python3 /tmp/pmbootstrap/pmbootstrap.py config channel edge
+
+          # Показываем итоговый конфиг
+          python3 /tmp/pmbootstrap/pmbootstrap.py config
+
+      - name: Copy device packages to pmaports
+        run: |
+          WORK=/home/runner/.local/var/pmbootstrap
+          PMAPORTS=$(python3 /tmp/pmbootstrap/pmbootstrap.py config aports)
+          echo "pmaports at: $PMAPORTS"
           cp -r device-realme-oscar $PMAPORTS/device/testing/
           cp -r linux-realme-oscar $PMAPORTS/device/testing/
 
-      - name: Init pmbootstrap
-        run: |
-          WORK=/home/runner/.local/var/pmbootstrap
-          PMAPORTS=$WORK/cache_git/pmaports
-          printf 'realme-oscar\nxfce4\nuser\noscarpmos\nUTC\nen_US.UTF-8\n\n' | \
-            python3 /tmp/pmbootstrap/pmbootstrap.py \
-              --work $WORK \
-              --aports $PMAPORTS \
-              init || true
-          python3 /tmp/pmbootstrap/pmbootstrap.py --work $WORK --aports $PMAPORTS config
-
       - name: Build kernel
         run: |
-          WORK=/home/runner/.local/var/pmbootstrap
-          PMAPORTS=$WORK/cache_git/pmaports
-          python3 /tmp/pmbootstrap/pmbootstrap.py \
-            --work $WORK --aports $PMAPORTS \
-            -y build linux-realme-oscar 2>&1 | tee kernel-build.log
+          python3 /tmp/pmbootstrap/pmbootstrap.py -y build linux-realme-oscar \
+            2>&1 | tee kernel-build.log
 
       - name: Build device package
         run: |
-          WORK=/home/runner/.local/var/pmbootstrap
-          PMAPORTS=$WORK/cache_git/pmaports
-          python3 /tmp/pmbootstrap/pmbootstrap.py \
-            --work $WORK --aports $PMAPORTS \
-            -y build device-realme-oscar 2>&1 | tee device-build.log
+          python3 /tmp/pmbootstrap/pmbootstrap.py -y build device-realme-oscar \
+            2>&1 | tee device-build.log
 
       - name: Install rootfs
         run: |
-          WORK=/home/runner/.local/var/pmbootstrap
-          PMAPORTS=$WORK/cache_git/pmaports
-          python3 /tmp/pmbootstrap/pmbootstrap.py \
-            --work $WORK --aports $PMAPORTS \
-            -y install --no-fde 2>&1 | tee install.log
+          python3 /tmp/pmbootstrap/pmbootstrap.py -y install --no-fde \
+            2>&1 | tee install.log
 
       - name: Export images
         run: |
-          WORK=/home/runner/.local/var/pmbootstrap
-          PMAPORTS=$WORK/cache_git/pmaports
-          python3 /tmp/pmbootstrap/pmbootstrap.py \
-            --work $WORK --aports $PMAPORTS \
-            export
+          python3 /tmp/pmbootstrap/pmbootstrap.py export
           mkdir output
           cp /tmp/postmarketOS-export/* output/ 2>/dev/null || true
           ls -lh output/
