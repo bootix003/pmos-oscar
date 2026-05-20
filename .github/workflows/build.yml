@@ -30,20 +30,19 @@ jobs:
 
       - name: Clone pmaports and copy device packages
         run: |
-          PMAPORTS=/tmp/pmaports
           git clone --depth=1 -b main \
-            https://gitlab.postmarketos.org/postmarketOS/pmaports.git $PMAPORTS
-          cp -r device-realme-oscar $PMAPORTS/device/testing/
-          cp -r linux-realme-oscar $PMAPORTS/device/testing/
-          ls $PMAPORTS/device/testing/ | grep realme
+            https://gitlab.postmarketos.org/postmarketOS/pmaports.git /tmp/pmaports
+          cp -r device-realme-oscar /tmp/pmaports/device/testing/
+          cp -r linux-realme-oscar /tmp/pmaports/device/testing/
 
       - name: Init pmbootstrap
         run: |
           WORK=/home/runner/.local/var/pmbootstrap
           mkdir -p $WORK
-          # Порядок ответов init v3:
-          # work, pmaports, channel, vendor, codename, ui, user, hostname, timezone, locale, ssh_keys
-          printf '%s\n%s\nedge\nrealme\noscar\nxfce4\nuser\npulseaudio\noscar-pmos\nUTC\nen_US.UTF-8\nn\n' \
+          # Порядок ответов:
+          # work, pmaports, channel, vendor, codename, ui, username,
+          # audio provider, wifi provider, hostname, timezone, locale, ssh_keys
+          printf '%s\n%s\nedge\nrealme\noscar\nxfce4\nuser\npulseaudio\nwpa_supplicant\noscar-pmos\nUTC\nen_US.UTF-8\nn\n' \
             "$WORK" "/tmp/pmaports" | \
             python3 /tmp/pmbootstrap/pmbootstrap.py init
           python3 /tmp/pmbootstrap/pmbootstrap.py config
