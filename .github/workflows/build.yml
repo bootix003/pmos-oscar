@@ -25,16 +25,19 @@ jobs:
           pip3 install --user pmbootstrap==2.1.0 --break-system-packages
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Setup pmaports
+      - name: Setup pmbootstrap and pmaports
         run: |
-          git clone --depth=1 https://gitlab.com/postmarketOS/pmaports.git /tmp/pmaports
-          cp -r device-realme-oscar /tmp/pmaports/device/testing/
-          cp -r linux-realme-oscar /tmp/pmaports/device/testing/
+          WORK=/home/runner/.local/var/pmbootstrap
+          PMAPORTS=$WORK/cache_git/pmaports
+          mkdir -p $WORK $PMAPORTS
 
-      - name: Configure pmbootstrap
-        run: |
+          git clone --depth=1 https://gitlab.com/postmarketOS/pmaports.git $PMAPORTS
+          cp -r device-realme-oscar $PMAPORTS/device/testing/
+          cp -r linux-realme-oscar $PMAPORTS/device/testing/
+
           mkdir -p ~/.config/pmbootstrap
-          printf '[pmbootstrap]\naports = /tmp/pmaports\nccache_size = 5G\ndevice = realme-oscar\nextra_packages = nano,openssh\nhostname = oscar-pmos\njobs = 4\nkernel = downstream\nkeymap =\nlocale = en_US.UTF-8\nmirror_alpine = https://dl-cdn.alpinelinux.org/alpine/\nnonfree_firmware = true\nnonfree_userland = false\nssh_keys = false\ntimezone = UTC\nui = xfce4\nuser = user\nwork = /home/runner/.local/var/pmbootstrap\n' > ~/.config/pmbootstrap/config
+          printf '[pmbootstrap]\naports = %s\nccache_size = 5G\ndevice = realme-oscar\nextra_packages = nano,openssh\nhostname = oscar-pmos\njobs = 4\nkernel = downstream\nkeymap =\nlocale = en_US.UTF-8\nmirror_alpine = https://dl-cdn.alpinelinux.org/alpine/\nnonfree_firmware = true\nnonfree_userland = false\nssh_keys = false\ntimezone = UTC\nui = xfce4\nuser = user\nwork = %s\n' "$PMAPORTS" "$WORK" > ~/.config/pmbootstrap/config
+          cat ~/.config/pmbootstrap/config
           pmbootstrap -y work_migrate
 
       - name: Build kernel
