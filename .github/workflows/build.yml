@@ -89,3 +89,11 @@ jobs:
           name: build-logs
           path: "*.log"
           retention-days: 7
+
+      - name: Upload pmbootstrap log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pmbootstrap-log
+          path: /home/runner/.local/var/pmbootstrap/log.txt
+          retention-days: 7
