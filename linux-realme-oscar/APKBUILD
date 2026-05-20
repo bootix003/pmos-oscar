@@ -7,10 +7,9 @@ license="GPL-2.0-only"
 options="!strip !check !tracedeps pmb:kconfigcheck-nftables"
 makedepends="
 	bash bc bison devicepkg-dev elfutils-dev flex
-	gcc-aarch64-linux-gnu gmp-dev installkernel
+	gcc gmp-dev installkernel
 	linux-headers openssl-dev perl python3 sed
 "
-
 _carch="arm64"
 _flavor="realme-oscar"
 _config="config-$_flavor.$_carch"
@@ -33,7 +32,6 @@ build() {
 	unset LDFLAGS
 	make ARCH="$_carch" \
 		CC="${CC:-gcc}" \
-		CROSS_COMPILE="aarch64-linux-gnu-" \
 		KBUILD_BUILD_VERSION="$((pkgrel + 1))-postmarketOS" \
 		Image.gz modules
 }
@@ -42,7 +40,6 @@ package() {
 	install -Dm644 arch/arm64/boot/Image.gz \
 		"$pkgdir/boot/vmlinuz"
 	make ARCH="$_carch" \
-		CROSS_COMPILE="aarch64-linux-gnu-" \
 		INSTALL_MOD_PATH="$pkgdir" \
 		modules_install
 	install -Dm644 include/config/kernel.release \
